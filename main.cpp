@@ -27,11 +27,14 @@ struct options final
 
   float threshold{ 500.0F };
 
+  bool debug{ false };
+
   [[nodiscard]] auto parse(int argc, char** argv) -> bool
   {
     cxxopts::Options options(argv[0], "Records anomalous images to disk.");
 
-    options.add_options() //
+    options.add_options()                                                                                        //
+      ("debug", "Enable debug logging.", cxxopts::value<bool>()->default_value("false")->implicit_value("true")) //
       ("device",
        "Which video device to open.",
        cxxopts::value<int>()->default_value(std::to_string(device_index))) //
@@ -57,6 +60,7 @@ struct options final
         return false;
       }
 
+      debug = result["debug"].as<bool>();
       device_index = result["device"].as<int>();
       file = result["file"].as<std::string>();
       threshold = result["threshold"].as<float>();
@@ -76,7 +80,7 @@ run_pipeline(ad::pipeline& pipeline, const options& opts) -> bool
 {
   while (pipeline.good()) {
 
-    SPDLOG_INFO("Running pipeline.");
+    SPDLOG_DEBUG("Running pipeline.");
 
     if (!pipeline.iterate()) {
       SPDLOG_ERROR("Pipeline failed.");
@@ -85,7 +89,7 @@ run_pipeline(ad::pipeline& pipeline, const options& opts) -> bool
 
     const auto anomaly = fabsf(pipeline.get_last_anomaly_level());
     if (anomaly < opts.threshold) {
-      SPDLOG_INFO("Anomaly level is {}", anomaly);
+      SPDLOG_DEBUG("Anomaly level is {}", anomaly);
       continue;
     }
 
@@ -117,6 +121,10 @@ main(int argc, char** argv) -> int
 
   if (!opts.parse(argc, argv)) {
     return EXIT_FAILURE;
+  }
+
+  if (opts.debug) {
+    spdlog::set_level(spdlog::level::debug);
   }
 
   if (opts.file.empty()) {
