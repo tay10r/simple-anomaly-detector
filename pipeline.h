@@ -102,6 +102,8 @@ private:
   std::vector<pixel_f32> background_mean_;
 
   std::vector<pixel_f32> background_stddev_;
+
+  int background_update_counter{ 0 };
 };
 
 } // namespace ad

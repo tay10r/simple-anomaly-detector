@@ -77,8 +77,13 @@ pipeline::iterate() -> bool
 
   last_anomaly_level_ /= static_cast<float>(num_pixels * 3);
 
-  if (fabsf(last_anomaly_level_) < background_anomaly_threshold_) {
+  auto background_should_update = background_update_counter == 0;
+
+  if (background_should_update || (fabsf(last_anomaly_level_) < background_anomaly_threshold_)) {
     add_to_background_model(last_frame_);
+    background_update_counter = 30;
+  } else {
+    background_update_counter--;
   }
 
   return true;
