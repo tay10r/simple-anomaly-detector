@@ -88,8 +88,15 @@ run_pipeline(ad::pipeline& pipeline, const options& opts) -> bool
     }
 
     const auto anomaly = fabsf(pipeline.get_last_anomaly_level());
+
+    SPDLOG_DEBUG("Anomaly level is {}", anomaly);
+
+    if (!ad::report(pipeline.get_last_timestamp(), anomaly, opts.report_ip.c_str())) {
+      SPDLOG_ERROR("Failed to publish anomaly report.");
+    }
+
     if (anomaly < opts.threshold) {
-      SPDLOG_DEBUG("Anomaly level is {}", anomaly);
+      // No need to save the data.
       continue;
     }
 
@@ -101,10 +108,6 @@ run_pipeline(ad::pipeline& pipeline, const options& opts) -> bool
     const auto name = name_stream.str();
 
     SPDLOG_INFO("Reporting anomaly of level {} to path '{}'.", anomaly, name);
-
-    if (!ad::report(pipeline.get_last_timestamp(), anomaly, opts.report_ip.c_str())) {
-      SPDLOG_ERROR("Failed to publish anomaly report.");
-    }
 
     cv::imwrite(name, pipeline.get_last_frame());
   }
