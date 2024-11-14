@@ -98,7 +98,7 @@ run_pipeline(ad::pipeline& pipeline, const options& opts) -> bool
 
     SPDLOG_INFO("Reporting anomaly of level {} to path '{}'.", anomaly, name);
 
-    if (!ad::report(anomaly, opts.report_ip.c_str())) {
+    if (!ad::report(pipeline.get_last_timestamp(), anomaly, opts.report_ip.c_str())) {
       SPDLOG_ERROR("Failed to publish anomaly report.");
     }
 

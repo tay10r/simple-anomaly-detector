@@ -17,7 +17,7 @@ to_handle(uv_udp_t* h) -> uv_handle_t*
 } // namespace
 
 [[nodiscard]] auto
-report(float anomaly, const char* ip, const int udp_port) -> bool
+report(const double timestamp, const double anomaly, const char* ip, const int udp_port) -> bool
 {
   sockaddr_in address{};
 
@@ -36,9 +36,11 @@ report(float anomaly, const char* ip, const int udp_port) -> bool
 
   uv_udp_send_t write_op;
 
+  double data[2]{ timestamp, anomaly };
+
   uv_buf_t send_buffer;
-  send_buffer.base = reinterpret_cast<char*>(&anomaly);
-  send_buffer.len = sizeof(anomaly);
+  send_buffer.base = reinterpret_cast<char*>(&data[0]);
+  send_buffer.len = sizeof(data);
 
   const auto send_err =
     uv_udp_send(&write_op, &socket, &send_buffer, 1, reinterpret_cast<const sockaddr*>(&address), nullptr);
