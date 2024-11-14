@@ -46,6 +46,9 @@ pipeline::iterate() -> bool
     return false;
   }
 
+  last_timestamp_ = static_cast<double>(
+    std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+
   if (background_frames_.size() < max_background_frames_) {
     add_to_background_model(last_frame_);
     return true;
@@ -152,6 +155,12 @@ auto
 pipeline::get_last_frame() const -> const cv::Mat&
 {
   return last_frame_;
+}
+
+auto
+pipeline::get_last_timestamp() const -> double
+{
+  return last_timestamp_;
 }
 
 auto

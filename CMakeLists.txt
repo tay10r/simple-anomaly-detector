@@ -5,12 +5,27 @@ project(ad2)
 option(AD_TEST "Whether or not to build the test program." OFF)
 
 find_package(OpenCV CONFIG REQUIRED)
+find_package(cxxopts CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(libuv CONFIG REQUIRED)
 
 add_library(ad-pipeline
   pipeline.h
-  pipeline.cpp)
+  pipeline.cpp
+  report.h
+  report.cpp)
 
 target_link_libraries(ad-pipeline PUBLIC ${OpenCV_LIBRARIES})
+
+add_executable(anomaly-detect
+  main.cpp)
+
+target_link_libraries(anomaly-detect
+  PUBLIC
+    ad-pipeline
+    cxxopts::cxxopts
+    spdlog::spdlog
+    libuv::uv_a)
 
 if(AD_TEST)
 

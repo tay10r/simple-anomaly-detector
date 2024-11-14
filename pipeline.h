@@ -64,6 +64,8 @@ public:
 
   [[nodiscard]] auto get_last_frame() const -> const cv::Mat&;
 
+  [[nodiscard]] auto get_last_timestamp() const -> double;
+
   [[nodiscard]] auto get_last_anomaly_level() const -> float;
 
 protected:
@@ -73,6 +75,8 @@ private:
   cv::VideoCapture capture_;
 
   cv::Mat last_frame_;
+
+  double last_timestamp_{};
 
   /**
    * @brief Only non-anomaly frames get put here.
