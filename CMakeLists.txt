@@ -3,11 +3,18 @@ cmake_minimum_required(VERSION 3.14.7)
 project(ad2)
 
 option(AD_TEST "Whether or not to build the test program." OFF)
+option(AD_NO_VCPKG "Do not rely on vcpkg for building." OFF)
 
 find_package(OpenCV CONFIG REQUIRED)
 find_package(cxxopts CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(libuv CONFIG REQUIRED)
+
+if(AD_NO_VCPKG)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
+else()
+  find_package(libuv CONFIG REQUIRED)
+endif()
 
 add_library(ad-pipeline
   pipeline.h
@@ -24,8 +31,16 @@ target_link_libraries(anomaly-detect
   PUBLIC
     ad-pipeline
     cxxopts::cxxopts
-    spdlog::spdlog
-    libuv::uv_a)
+    spdlog::spdlog)
+
+if(TARGET libuv::uv_a)
+  target_link_libraries(anomaly-detect PUBLIC libuv::uv_a)
+elseif(TARGET libuv::uv)
+  target_link_libraries(anomaly-detect PUBLIC libuv::uv)
+else()
+  target_link_libraries(anomaly-detect PUBLIC PkgConfig::LIBUV)
+  target_include_directories(anomaly-detect PUBLIC ${LIBUV_INCLUDE_DIRS})
+endif()
 
 if(AD_TEST)
 

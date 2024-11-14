@@ -32,6 +32,7 @@ report(float anomaly, const char* ip, const int udp_port) -> bool
 
   uv_udp_t socket{};
   uv_udp_init(&loop, &socket);
+  uv_udp_set_broadcast(&socket, 1);
 
   uv_udp_send_t write_op;
 
