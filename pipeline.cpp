@@ -8,19 +8,6 @@
 
 namespace ad {
 
-namespace {
-
-auto
-squared_distance(const pixel& a, const pixel& b) -> float
-{
-  const auto x = static_cast<float>(a.rgb[0]) - static_cast<float>(b.rgb[0]);
-  const auto y = static_cast<float>(a.rgb[1]) - static_cast<float>(b.rgb[1]);
-  const auto z = static_cast<float>(a.rgb[2]) - static_cast<float>(b.rgb[2]);
-  return (x * x + y * y + z * z) / (255 * 255);
-}
-
-} // namespace
-
 pipeline::pipeline(std::string video_path)
   : capture_(video_path)
 {
@@ -60,13 +47,20 @@ pipeline::iterate() -> bool
 
   const auto num_pixels = last_frame_.total();
 
+  // This protects against pixels that don't change.
+  // In cases like those, any pixel with a different value would have a z score of infinity.
+  auto safe_stddev = [](const float stddev) -> float {
+    constexpr auto threshold{ 1.0F / 256.0F };
+    return (stddev < threshold) ? 1.0F : stddev;
+  };
+
   for (auto i = 0; i < num_pixels; i++) {
 
     const auto p = last_frame_.at<pixel>(i);
 
-    const auto stddev_r = std::max(background_stddev_[i].rgb[0], 1.0e-6F);
-    const auto stddev_g = std::max(background_stddev_[i].rgb[1], 1.0e-6F);
-    const auto stddev_b = std::max(background_stddev_[i].rgb[2], 1.0e-6F);
+    const auto stddev_r = safe_stddev(background_stddev_[i].rgb[0]);
+    const auto stddev_g = safe_stddev(background_stddev_[i].rgb[1]);
+    const auto stddev_b = safe_stddev(background_stddev_[i].rgb[2]);
 
     const auto score_r = (p.rgb[0] - background_mean_[i].rgb[0]) / stddev_r;
     const auto score_g = (p.rgb[1] - background_mean_[i].rgb[1]) / stddev_g;
