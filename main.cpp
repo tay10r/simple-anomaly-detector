@@ -25,7 +25,7 @@ struct options final
 
   std::string report_ip{ "127.0.0.1" };
 
-  float threshold{ 500.0F };
+  float threshold{ 1.0F };
 
   bool debug{ false };
 

@@ -97,7 +97,7 @@ private:
    * @brief If the anomaly threshold is above this value, do not use it to
    * update the background model.
    */
-  float background_anomaly_threshold_{ 100.0F };
+  float background_anomaly_threshold_{ 0.5F };
 
   std::vector<pixel_f32> background_mean_;
 
