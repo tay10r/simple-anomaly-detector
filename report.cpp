@@ -48,7 +48,7 @@ report(const double timestamp, const double anomaly, const char* ip, const int u
 
   auto on_write = [](uv_udp_send_t*, const int status) {
     if (status == 0) {
-      SPDLOG_INFO("Sent anomaly report.");
+      SPDLOG_DEBUG("Sent anomaly report.");
     } else {
       SPDLOG_ERROR("Failed to send anomaly report: {}", uv_strerror(status));
     }
